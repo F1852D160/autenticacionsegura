@@ -1,5 +1,6 @@
 package autenticacionsegura;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -7,13 +8,15 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
 
-public class TOTP {
+public class TOTPborrar {
 
-	private TOTP() {
+	private TOTPborrar() {
 	}
 
 	/**
@@ -151,7 +154,16 @@ public class TOTP {
 
 	public static void main(String[] args) {
 		// Seed for HMAC-SHA1 - 20 bytes
-		String seed = "3132333435363738393031323334353637383930";
+//		String seed = "3132333435363738393031323334353637383930";
+		String seed = "455a47545855335947424332504a3547";
+		String seed0 = "EZGTXU3YGBC2PJ5G";
+		seed0 = "455a47545855335947424332504a3547";
+		long TT = new Date().getTime();
+		String steps0 = Long.toHexString(TT).toUpperCase();
+		while (steps0.length() < 16)
+			steps0 = "0" + steps0;
+		System.out.println("TOTP="+generateTOTP(seed0, steps0, "6", "HmacSHA1"));
+		
 		// Seed for HMAC-SHA256 - 32 bytes
 		String seed32 = "3132333435363738393031323334353637383930" + "313233343536373839303132";
 		// Seed for HMAC-SHA512 - 64 bytes
@@ -160,7 +172,7 @@ public class TOTP {
 		long T0 = 0;
 		long X = 30;
 		long testTime[] = { 59L, 1111111109L, 1111111111L, 1234567890L, 2000000000L, 20000000000L };
-
+		testTime[5] =  TimeUnit.MILLISECONDS.toSeconds(new Date().getTime());//milisegundos a segundos
 		String steps = "0";
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		df.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -177,7 +189,7 @@ public class TOTP {
 				String fmtTime = String.format("%1$-11s", testTime[i]);
 				String utcTime = df.format(new Date(testTime[i] * 1000));
 				System.out.print("|  " + fmtTime + "  |  " + utcTime + "  | " + steps + " |");
-				System.out.println(generateTOTP(seed, steps, "6", "HmacSHA1") + "| SHA1   |");
+				System.out.println(generateTOTP(seed0, steps, "6", "HmacSHA1") + "| SHA1   |");
 				System.out.print("|  " + fmtTime + "  |  " + utcTime + "  | " + steps + " |");
 				System.out.println(generateTOTP(seed32, steps, "6", "HmacSHA256") + "| SHA256 |");
 				System.out.print("|  " + fmtTime + "  |  " + utcTime + "  | " + steps + " |");
@@ -189,5 +201,13 @@ public class TOTP {
 		} catch (final Exception e) {
 			System.out.println("Error : " + e);
 		}
+	}
+	
+	
+	public static String toHexadecimal(String text) throws UnsupportedEncodingException
+	{
+	    byte[] myBytes = text.getBytes("UTF-8");
+
+	    return DatatypeConverter.printHexBinary(myBytes);
 	}
 }
